@@ -13,9 +13,12 @@ use std::{
     io::{self, Read},
     time::Duration,
 };
+use termimad::MadSkin;
 
 fn main() -> Result<(), Box<dyn Error>> {
     dotenv().ok();
+
+    let skin = MadSkin::default();
 
     let api_key: String = env::var("API_KEY")?;
     let api_url: String = env::var("API_URL")? + api_key.as_str();
@@ -38,6 +41,7 @@ fn main() -> Result<(), Box<dyn Error>> {
             break;
         }
 
+        println!();
         println!("Model:");
         let body: Contents = Contents::new(vec![Content::new(
             vec![Part::from(prompt.trim())],
@@ -51,7 +55,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         let json: Value = res.json()?;
 
         if let Some(text) = json["candidates"][0]["content"]["parts"][0]["text"].as_str() {
-            println!("{}", text);
+            skin.print_text(text);
         } else {
             println!("Texto da resposta não encontrado.");
         }
