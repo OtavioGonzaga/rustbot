@@ -11,6 +11,10 @@ impl Contents {
     pub fn new(contents: Vec<Content>) -> Self {
         Self { contents }
     }
+
+    pub fn add(&mut self, content: Content) {
+        self.contents.push(content);
+    }
 }
 
 #[derive(Serialize, Deserialize)]
