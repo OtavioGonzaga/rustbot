@@ -1,42 +1,45 @@
+mod config;
 mod content;
 
+use config::Config;
 use content::{Content, Part, Role, content::Contents};
-use dotenv::dotenv;
 use reqwest::{
+    Url,
     blocking::{Client, Response},
     header::HeaderMap,
 };
 use serde_json::Value;
 use std::{
-    env,
     error::Error,
     fs::{self, File},
     io::{self, Read, Write},
-    path::Path,
+    path::PathBuf,
     time::Duration,
 };
 use termimad::MadSkin;
 
 fn main() -> Result<(), Box<dyn Error>> {
-    dotenv().ok();
-
-    let api_key: String = env::var("API_KEY")?;
-    let api_url: String = env::var("API_URL")? + api_key.as_str();
-
     let skin: MadSkin = MadSkin::default();
-    let path: &str = "messages/messages.json";
+
+    let api_url: Url = Url::parse_with_params(
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent",
+        &[("key", Config::load().unwrap().api_key)],
+    )?;
+
+    let config_path: PathBuf = dirs::config_dir().expect("Unable to find config directory");
+    let path: PathBuf = config_path.join("rustbot/messages.json");
     let mut file: File;
     let mut contents: Contents = Contents::new(vec![]);
 
-    if Path::new(path).exists() {
-        file = File::open(path)?;
+    if path.exists() {
+        file = File::open(&path)?;
         contents = serde_json::from_reader(file)?;
     } else {
-        if let Some(parent) = Path::new(path).parent() {
+        if let Some(parent) = path.parent() {
             fs::create_dir_all(parent)?;
         }
 
-        file = File::create(path)?;
+        file = File::create(&path)?;
         file.write_all(serde_json::to_string(&contents)?.as_bytes())?;
     }
 
@@ -64,7 +67,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         println!("Model:");
 
         let res: Response = client
-            .post(&api_url)
+            .post(api_url.clone())
             .body(serde_json::to_string(&contents)?)
             .send()?;
         let json: Value = res.json()?;
@@ -75,10 +78,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 
             contents.add(Content::new(vec![Part::from(text.trim())], Role::Model));
 
-            let mut file: File = File::create(path)?;
+            let mut file: File = File::create(&path)?;
             file.write_all(serde_json::to_string(&contents)?.as_bytes())?;
         } else {
-            println!("Texto da resposta não encontrado.");
+            println!("Response body not found.");
         }
     }
 

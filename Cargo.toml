@@ -2,13 +2,14 @@
 name = "rustbot"
 version = "0.1.0"
 authors = ["Otavio Luiz Gonzaga <otaviolgonzaga@gmail.com>"]
+description = "Chat Gemini flash in terminal"
 license = "GPL-3.0-or-later"
-license-file = "LICENSE"
 edition = "2024"
 
 [dependencies]
-dotenv = "0.15.0"
+dirs = "6.0.0"
 reqwest = { version = "0.12.15", features = ["blocking", "json"] }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 termimad = "0.31.3"
+toml = "0.8.21"
