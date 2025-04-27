@@ -1,6 +1,9 @@
 [package]
 name = "rustbot"
 version = "0.1.0"
+authors = ["Otavio Luiz Gonzaga <otaviolgonzaga@gmail.com>"]
+license = "GPL-3.0-or-later"
+license-file = "LICENSE"
 edition = "2024"
 
 [dependencies]
